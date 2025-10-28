@@ -2,56 +2,26 @@
 
 Architecture of the program
 
-                ┌─────────────────────────┐
-                │   BSE Announcements     │
-                └───────────┬─────────────┘
-                            │
-                            │ (scrape every run)
-                            ▼
-                  ┌───────────────────┐
-                  │   Scrape Step     │
-                  │  `app.py scrape`  │
-                  └───────┬───────────┘
+                  ┌──────────────────────────┐
+                  │ Scrape Corperate filings │
+                  │ from the BSE website     │
+                  │  `app.py scrape`         │
+                  └───────┬──────────────────┘
                           │
-                writes PDFs + metadata
+                saves the pdfs in local storage
                           │
                           ▼
-        ┌─────────────────────────────────────────┐
-        │         Local File Storage (data/)       │
-        │                                          │
-        │  raw/YYYY-MM-DD/*.pdf                    │
-        │  meta/YYYY-MM-DD/announcements.jsonl     │
-        └─────────────────┬───────────────────────┘
+        ┌─────────────────────────────────────────────────────────────┐
+        │         LLM ranking                                         │
+        │                                                             │
+        │  takes all this data and sends it to Chatgpt for evaluation │
+        │                               GPT.py                        │
+        └─────────────────┬───────────────────────────────────────────┘
                           │
                           │
                           ▼
-                  ┌───────────────────┐
-                  │  Score Step       │
-                  │ `app.py score`    │
-                  │ (LLM API call)    │
-                  └───────┬───────────┘
-                          │
-                  writes per-file JSON judgments:
-                  event_type, direction, materiality, confidence, why
-                          │
-                          ▼
-        ┌─────────────────────────────────────────┐
-        │    results/YYYY-MM-DD/micro_scores.jsonl│
-        └─────────────────┬───────────────────────┘
-                          │
-                          │
-                          ▼
-                  ┌───────────────────┐
-                  │  Rank Step        │
-                  │ `app.py rank`     │
-                  │ (simple heuristic)│
-                  └───────┬───────────┘
-                          │
-                outputs Top-K movers lists
-                          │
-                          ▼
-         ┌───────────────────────────────┐
-         │   results/YYYY-MM-DD/         │
-         │       watchlist_preopen.json  │
-         │       watchlist_live.json     │
-         └───────────────────────────────┘
+         ┌──────────────────────────────────────────────────────┐
+         │   Outputs result and sends it to an email ID         │
+         │       EmailUpdater.py                                │
+         │                                                      │
+         └──────────────────────────────────────────────────────┘
